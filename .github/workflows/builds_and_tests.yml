@@ -202,7 +202,9 @@ jobs:
         with:
           go-version: '1.20'
       - name: Build docker image
-        run: cd builders && make docker-image-alpine && make docker-image-cross
+        run: |
+          cd builders && make docker-image-alpine && make docker-image-cross
+          docker image ls
       - name: Build shared library for Linux
         run: make release-build-linux
       - name: Build shared library for macOS
