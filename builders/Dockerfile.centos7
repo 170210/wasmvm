@@ -43,11 +43,12 @@ RUN chmod -R 777 /usr/local/cargo
 
 WORKDIR /code
 
-COPY ./builders/guest/*.sh /opt/
+COPY guest/*.sh /opt/
 RUN chmod +x /opt/*.sh
 
 RUN mkdir /.cargo
 RUN chmod +rx /.cargo
+RUN ls -al
 COPY guest/cargo-config /.cargo/config
 
 # Copy the missing library libgcc_s.so that gcc does not provide
