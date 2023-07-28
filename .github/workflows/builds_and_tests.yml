@@ -192,7 +192,6 @@ jobs:
       - name: Build static library and test
         run: make test-alpine
 
-  docker_build
   deploy_to_git:
     # needs
     runs-on: ubuntu-latest
