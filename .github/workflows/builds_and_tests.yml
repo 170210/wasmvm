@@ -1,6 +1,6 @@
 name: Builds and Tests
 
-on: [pull_request]
+on: push
 
 jobs:
   libwasmvm_sanity:
