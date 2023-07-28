@@ -228,9 +228,10 @@ jobs:
       #     echo "CACHE_FILE=${CACHE_FILE}" >> $GITHUB_OUTPUT
       - name: Debug build results
         run: ls -l ./internal/api
+      - name: cd
+        run: cd ./builders
       - name: build docker
         uses: docker/build-push-action@v2
-        working-directory: ./builders
         with:
           context: ../
           file: ./Dockerfile.centos7
