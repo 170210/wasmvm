@@ -25,7 +25,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          key: ${{ runner.os }}-buildx-1
           restore-keys: |
             ${{ runner.os }}-buildx-  
 
@@ -44,7 +44,7 @@ jobs:
         with:
           context: ./builders
           file: ./Dockerfile.centos7
-          tags: finschia/wasmvm-builder-centos7:${{ github.sha }}
+          tags: finschia/wasmvm-builder-centos7
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
           load: true
