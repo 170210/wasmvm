@@ -47,7 +47,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./builders
-          file: ./Dockerfile.centos7
+          file: ./builders/Dockerfile.centos7
           tags: finschia/wasmvm-builder-centos7:${{ github.sha }}
           # cache-from: type=local,src=/tmp/.buildx-cache
           # cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
