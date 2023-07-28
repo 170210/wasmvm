@@ -39,19 +39,19 @@ jobs:
       #     echo "CACHE_FILE=${CACHE_FILE}" >> $GITHUB_OUTPUT
       - name: Debug build results
         run: ls -l ./internal/api
-      - name: Build shared library for macOS
-        run: |
-          cd ./builders
-          docker build --pull . --no-cache -f ./Dockerfile.centos7
-      # - name: build docker
-      #   uses: docker/build-push-action@v2
-      #   with:
-      #     context: .
-      #     file: ./builders/Dockerfile.centos7
-      #     tags: finschia/wasmvm-builder-centos7:${{ github.sha }}
-      #     cache-from: type=local,src=/tmp/.buildx-cache
-      #     cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-      #     load: true
+      # - name: Build shared library for macOS
+      #   run: |
+      #     cd ./builders
+      #     docker build --pull . --no-cache -f ./Dockerfile.centos7
+      - name: build docker
+        uses: docker/build-push-action@v2
+        with:
+          context: ./builders
+          file: ./Dockerfile.centos7
+          tags: finschia/wasmvm-builder-centos7:${{ github.sha }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+          # load: true
           # push: true
 
       - name: Move cache
