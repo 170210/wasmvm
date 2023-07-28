@@ -81,8 +81,8 @@ jobs:
       # - name: Create checksums
       #   working-directory: ./artifacts
       #   run: sha256sum * > checksums.txt && cat checksums.txt
-      - name: Debug build results
-        run: ls -l ./internal/api
+      # - name: Debug build results
+      #   run: ls -l ./internal/api
 
       # - name: Check-in and push new libraries
       #   run: |
