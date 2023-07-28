@@ -43,7 +43,7 @@ RUN chmod -R 777 /usr/local/cargo
 
 WORKDIR /code
 
-COPY guest/*.sh /opt/
+COPY ./builders/guest/*.sh /opt/
 RUN chmod +x /opt/*.sh
 
 RUN mkdir /.cargo
