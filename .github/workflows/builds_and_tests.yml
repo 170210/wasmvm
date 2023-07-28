@@ -49,8 +49,8 @@ jobs:
           context: ./builders
           file: ./Dockerfile.centos7
           tags: finschia/wasmvm-builder-centos7:${{ github.sha }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+          # cache-from: type=local,src=/tmp/.buildx-cache
+          # cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
           # load: true
           # push: true
 
