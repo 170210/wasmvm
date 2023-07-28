@@ -214,7 +214,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}-1
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-  
 
@@ -228,14 +228,12 @@ jobs:
       #     echo "CACHE_FILE=${CACHE_FILE}" >> $GITHUB_OUTPUT
       - name: Debug build results
         run: ls -l ./internal/api
-      - name: cd
-        run: cd ./builders
       - name: build docker
         uses: docker/build-push-action@v2
         with:
-          context: ../
+          context: ./builders
           file: ./Dockerfile.centos7
-          tags: finschia/wasmvm-builder-centos7:${{ github.sha }}-1
+          tags: finschia/wasmvm-builder-centos7:${{ github.sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
           load: true
