@@ -191,3 +191,43 @@ jobs:
         run: cd builders && make docker-image-alpine
       - name: Build static library and test
         run: make test-alpine
+
+  deploy_to_git:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.20'
+      - name: Build docker image
+        run: cd builders && make docker-image-alpine && make docker-image-cross
+      - name: Build shared library for Linux
+        run: make release-build-linux
+      - name: Build shared library for macOS
+        run: make release-build-macos
+      # Shared libraries for Windows (.dll) currently do not work (https://github.com/CosmWasm/wasmvm/issues/389)
+      # and .dll builds are not deterministic.
+      # Deactivating this step to avoid polluting the git hostory.
+      # - name: Build shared library for Windows
+      #   run: make release-build-windows
+      - name: Collect artifacts
+        run: |
+          mkdir artifacts
+          cp ./internal/api/libwasmvm.x86_64.so ./artifacts/libwasmvm.x86_64.so
+          cp ./internal/api/libwasmvm.aarch64.so ./artifacts/libwasmvm.aarch64.so
+          cp ./internal/api/libwasmvm.dylib ./artifacts/libwasmvm.dylib
+      # - name: Create checksums
+      #   working-directory: ./artifacts
+      #   run: sha256sum * > checksums.txt && cat checksums.txt
+      - name: Debug build results
+        run: ls -l ./internal/api
+      # - name: Check-in and push new libraries
+      #   run: |
+      #     git config user.email "wasmvm@finschia.com"
+      #     git config user.name "Deploy Bot"
+      #     git status
+      #     git add ./internal/api
+      #     git commit --allow-empty -m '[skip ci] Built release libraries'
+      #     git push origin $GITHUB_REF
