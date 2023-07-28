@@ -230,8 +230,9 @@ jobs:
         run: ls -l ./internal/api
       - name: build docker
         uses: docker/build-push-action@v2
+        working-directory: ./builders
         with:
-          context: ./builders
+          context: ../
           file: ./Dockerfile.centos7
           tags: finschia/wasmvm-builder-centos7:${{ github.sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
