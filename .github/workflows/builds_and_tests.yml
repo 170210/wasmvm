@@ -21,13 +21,13 @@ jobs:
       #     mkdir -p /tmp/.buildx-cache
       #     mkdir -p ${{ env.CACHE_DIR }}
       
-      # - name: Cache Docker layers
-      #   uses: actions/cache@v2
-      #   with:
-      #     path: /tmp/.buildx-cache
-      #     key: ${{ runner.os }}-buildx-${{ github.sha }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-buildx-  
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-  
 
       # - name: Prepare
       #   id: prep
@@ -39,17 +39,18 @@ jobs:
       #     echo "CACHE_FILE=${CACHE_FILE}" >> $GITHUB_OUTPUT
       - name: Debug build results
         run: ls -l ./internal/api
-      - name: Build shared library for macOS
-        run: docker build --pull . --no-cache -f ./builders/Dockerfile.centos7
-      # - name: build docker
-      #   uses: docker/build-push-action@v2
-      #   with:
-      #     context: .
-      #     file: ./builders/Dockerfile.centos7
-      #     tags: finschia/wasmvm-builder-centos7:${{ github.sha }}
-          # cache-from: type=local,src=/tmp/.buildx-cache
-          # cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-          # load: true
+      # - name: Build shared library for macOS
+      #   run: docker build --pull . --no-cache -f ./builders/Dockerfile.centos7
+      - name: build docker
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./builders/Dockerfile.centos7
+          tags: finschia/wasmvm-builder-centos7:${{ github.sha }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+          load: true
+        args: --pull
           # push: true
 
       - name: Move cache
