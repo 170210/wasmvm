@@ -231,9 +231,9 @@ jobs:
       - name: build docker
         uses: docker/build-push-action@v2
         with:
-          context: .
-          file: ./builders/Dockerfile.centos7
-          tags: finschia/wasmvm-builder-centos7
+          context: ./builders
+          file: ./Dockerfile.centos7
+          tags: finschia/wasmvm-builder-centos7:${{ github.sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
           load: true
