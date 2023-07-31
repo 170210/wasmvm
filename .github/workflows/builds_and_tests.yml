@@ -47,7 +47,7 @@ jobs:
           tags: finschia/wasmvm-builder-centos7:${{ github.sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-          pull: true
+          load: true
       - name: Move cache
         run: |
           rm -rf /tmp/.buildx-cache
