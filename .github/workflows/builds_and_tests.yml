@@ -63,6 +63,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       # check tmp file 
+      - name: debug
+        run: ls -al /tmp
       - name: Download docker image
         uses: actions/download-artifact@v3
         with:
@@ -76,8 +78,8 @@ jobs:
         run: make release-build-${{matrix.os}}
       - name: debug
         run: |
-          cd ./artifacts
           ls -al
+          ls -al /tmp
       # - name: Build shared library for Windows
       #   run: make release-build-windows
       # - name: Collect artifacts
