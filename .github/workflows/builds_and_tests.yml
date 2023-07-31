@@ -100,8 +100,8 @@ jobs:
           path: ./internal/api
       - name: Calculate the checksum
         run: |
-          new_checksums = shasum -a 256 *.so *.dylib
-          old_checksums = cat checksums.txt
+          new_checksums=$(shasum -a 256 *.so *.dylib)
+          old_checksums=$(cat checksums.txt)
           echo $new_checksums
           echo $old_checksums
 
