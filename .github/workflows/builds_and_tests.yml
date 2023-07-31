@@ -15,12 +15,6 @@ jobs:
           go-version: '1.20'
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      
-      # - name: Create cache directory
-      #   run: |
-      #     mkdir -p /tmp/.buildx-cache
-      #     mkdir -p ${{ env.CACHE_DIR }}
-      
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
@@ -28,49 +22,69 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-  
-
-      # - name: Prepare
-      #   id: prep
-      #   run: |
-      #     HASH_GHE=${{ github.sha }}
-      #     VARIANT=$(TZ=UTC-9 date '+%Y%m')${HASH_GHE:0:7}
-      #     NAME_TAR="${VARIANT}.tar"
-      #     CACHE_FILE=${{ env.CACHE_DIR }}"/${NAME_TAR}"
-      #     echo "CACHE_FILE=${CACHE_FILE}" >> $GITHUB_OUTPUT
+      - name: Prepare
+        id: prep
+        run: |
+          HASH_GHE=${{ github.sha }}
+          TAG=$(TZ=UTC-9 date '+%Y%m')${HASH_GHE:0:7}
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
       - name: Debug build results
         run: ls -l ./internal/api
       - name: build docker
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: ./builders
           file: ./builders/Dockerfile.centos7
-          tags: finschia/wasmvm-builder-centos7:${{ github.sha }}
+          tags: finschia/wasmvm-builder-centos7:${{ steps.prep.outputs.tag }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-          load: true
+          outputs: type=docker,dest=/tmp/wasmvm-builder.tar
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: wasmvm-builder
+          path: /tmp/wasmvm-builder.tar
       - name: Move cache
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
-      # - name: Save docker image
-      #   run: cd builders && make docker-images
-      - name: debug
-        run: docker image ls
-      # - name: Build shared library for Linux
-      #   run: make release-build-linux
-      # - name: Build shared library for macOS
-      #   run: make release-build-macos
+  build_for_Linux:
+    runs-on: ubuntu-latest
+    needs: deploy_to_git
+    strategy:
+      fail-fast: false
+      matrix:
       # Shared libraries for Windows (.dll) currently do not work (https://github.com/CosmWasm/wasmvm/issues/389)
       # and .dll builds are not deterministic.
       # Deactivating this step to avoid polluting the git hostory.
+        os: ["linux", "macos"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      # check tmp file 
+      - name: Download docker image
+        uses: actions/download-artifact@v3
+        with:
+          name: wasmvm-builder
+          path: /tmp
+      - name: Load image
+        run: |
+          docker load --input /tmp/wasmvm-builder.tar
+          docker image ls -a
+      - name: Build shared library for Linux
+        run: make release-build-${{matrix.os}}
+      - name: debug
+        run: |
+          cd ./artifacts
+          ls -al
       # - name: Build shared library for Windows
       #   run: make release-build-windows
-      - name: Collect artifacts
-        run: |
-          mkdir artifacts
-          cp ./internal/api/libwasmvm.x86_64.so ./artifacts/libwasmvm.x86_64.so
-          cp ./internal/api/libwasmvm.aarch64.so ./artifacts/libwasmvm.aarch64.so
+      # - name: Collect artifacts
+      #   run: |
+      #     mkdir artifacts
+      #     cp ./internal/api/libwasmvm.x86_64.so ./artifacts/libwasmvm.x86_64.so
+      #     cp ./internal/api/libwasmvm.aarch64.so ./artifacts/libwasmvm.aarch64.so
       #cp ./internal/api/libwasmvm.dylib ./artifacts/libwasmvm.dylib
       # - name: Create checksums
       #   working-directory: ./artifacts
