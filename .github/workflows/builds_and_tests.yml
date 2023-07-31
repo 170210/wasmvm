@@ -5,6 +5,18 @@ on: push
 jobs:
   deploy_to_git:
     # needs
+    strategy:
+      fail-fast: false
+      matrix:
+      # Shared libraries for Windows (.dll) currently do not work (https://github.com/CosmWasm/wasmvm/issues/389)
+      # and .dll builds are not deterministic.
+      # Deactivating this step to avoid polluting the git hostory.
+        os: [linux, macos]
+        include: 
+          - os: linux
+            dockerfile_name: centos7
+          - os: macos
+            dockerfile_name: cross        
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -30,56 +42,61 @@ jobs:
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
       - name: Debug build results
         run: ls -l ./internal/api
-      - name: build docker
+      - name: Build docker
         uses: docker/build-push-action@v4
         with:
           context: ./builders
-          file: ./builders/Dockerfile.centos7
-          tags: finschia/wasmvm-builder-centos7:latest
+          file: ./builders/Dockerfile.${{ matrix.dockerfile_name }}
+          tags: finschia/wasmvm-builder-${{ matrix.dockerfile_name }}:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-          outputs: type=docker,dest=/tmp/wasmvm-builder.tar
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: wasmvm-builder
-          path: /tmp/wasmvm-builder.tar
+          load: true
+          # outputs: type=docker,dest=/tmp/wasmvm-${{ matrix.os }}-builder.tar
+      # - name: Upload artifact
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: wasmvm-${{ matrix.os }}-builder.tar
+      #     path: /tmp/wasmvm-builder
       - name: Move cache
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
-  build_for_Linux:
-    runs-on: ubuntu-latest
-    needs: deploy_to_git
-    strategy:
-      fail-fast: false
-      matrix:
+  # build_for_Linux:
+  #   runs-on: ubuntu-latest
+  #   needs: deploy_to_git
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
       # Shared libraries for Windows (.dll) currently do not work (https://github.com/CosmWasm/wasmvm/issues/389)
       # and .dll builds are not deterministic.
       # Deactivating this step to avoid polluting the git hostory.
-        os: ["linux", "macos"]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+    #     os: ["linux", "macos"]
+    # steps:
+    #   - name: Checkout
+    #     uses: actions/checkout@v2
       # check tmp file 
       - name: debug
-        run: ls -al /tmp
-      - name: Download docker image
-        uses: actions/download-artifact@v3
-        with:
-          name: wasmvm-builder
-          path: /tmp
-      - name: Load image
         run: |
-          docker load --input /tmp/wasmvm-builder.tar
           docker image ls -a
+          ls -al ./internal/api
+
+      # - name: Download docker image
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: wasmvm-builder
+      #     path: /tmp
+      # - name: Load image
+      #   run: |
+      #     docker load --input /tmp/wasmvm-builder.tar
+      #     docker image ls -a
       - name: Build shared library for Linux
         run: make release-build-${{matrix.os}}
       - name: debug
         run: |
           ls -al
           ls -al /tmp
+          ls -al ./internal/api
       # - name: Build shared library for Windows
       #   run: make release-build-windows
       # - name: Collect artifacts
