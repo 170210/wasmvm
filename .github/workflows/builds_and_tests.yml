@@ -102,8 +102,8 @@ jobs:
       - name: Upload shared library
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.shared_library }}
-          path: ./internal/api
+          name: ${{ matrix.os }}-shared-library
+          path: ./internal/api/${{ matrix.shared_library }}
       # - name: Build shared library for Windows
       #   run: make release-build-windows
       # - name: Collect artifacts
