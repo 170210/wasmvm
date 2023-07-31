@@ -3,144 +3,157 @@ name: Builds and Tests
 on: push
 
 jobs:
-  build_shared_library:
-    # needs
-    strategy:
-      fail-fast: false
-      matrix:
-      # Shared libraries for Windows (.dll) currently do not work (https://github.com/CosmWasm/wasmvm/issues/389)
-      # and .dll builds are not deterministic.
-      # Deactivating this step to avoid polluting the git hostory.
-        os: [linux, macos]
-        include: 
-          - os: linux
-            dockerfile_name: centos7
-            shared_library: so
-          - os: macos
-            dockerfile_name: cross
-            shared_library: dylib
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Set up
-        uses: actions/setup-go@v2
-        with:
-          go-version: '1.20'
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Prepare
-        id: prep
-        run: |
-          HASH_GHE=${{ github.sha }}
-          TAG=$(TZ=UTC-9 date '+%Y%m')${HASH_GHE:0:7}
-          echo "tag=${TAG}" >> $GITHUB_OUTPUT
-      - name: Cache Docker layers
-        uses: actions/cache@v2
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ matrix.os }}-buildx-${{ steps.prep.outputs.tag }}
-          restore-keys: |
-            ${{ matrix.os }}-buildx-
-      - name: Debug build results
-        run: ls -l ./internal/api
-      - name: Build docker
-        uses: docker/build-push-action@v4
-        with:
-          context: ./builders
-          file: ./builders/Dockerfile.${{ matrix.dockerfile_name }}
-          tags: finschia/wasmvm-builder-${{ matrix.dockerfile_name }}:latest
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-          load: true
-          # outputs: type=docker,dest=/tmp/wasmvm-${{ matrix.os }}-builder.tar
-      # - name: Upload artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: wasmvm-${{ matrix.os }}-builder.tar
-      #     path: /tmp/wasmvm-builder
-      - name: Move cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-  # build_for_Linux:
-  #   runs-on: ubuntu-latest
-  #   needs: deploy_to_git
+  # build_shared_library:
+  #   # needs
   #   strategy:
   #     fail-fast: false
   #     matrix:
-      # Shared libraries for Windows (.dll) currently do not work (https://github.com/CosmWasm/wasmvm/issues/389)
-      # and .dll builds are not deterministic.
-      # Deactivating this step to avoid polluting the git hostory.
-    #     os: ["linux", "macos"]
-    # steps:
-    #   - name: Checkout
-    #     uses: actions/checkout@v3
-      # check tmp file 
-      - name: debug
-        run: |
-          docker image ls -a
-          ls -al ./internal/api
+  #     # Shared libraries for Windows (.dll) currently do not work (https://github.com/CosmWasm/wasmvm/issues/389)
+  #     # and .dll builds are not deterministic.
+  #     # Deactivating this step to avoid polluting the git hostory.
+  #       os: [linux, macos]
+  #       include: 
+  #         - os: linux
+  #           dockerfile_name: centos7
+  #           shared_library: so
+  #         - os: macos
+  #           dockerfile_name: cross
+  #           shared_library: dylib
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #     - name: Set up
+  #       uses: actions/setup-go@v2
+  #       with:
+  #         go-version: '1.20'
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v2
+  #     - name: Prepare
+  #       id: prep
+  #       run: |
+  #         HASH_GHE=${{ github.sha }}
+  #         TAG=$(TZ=UTC-9 date '+%Y%m')${HASH_GHE:0:7}
+  #         echo "tag=${TAG}" >> $GITHUB_OUTPUT
+  #     - name: Cache Docker layers
+  #       uses: actions/cache@v2
+  #       with:
+  #         path: /tmp/.buildx-cache
+  #         key: ${{ matrix.os }}-buildx-${{ steps.prep.outputs.tag }}
+  #         restore-keys: |
+  #           ${{ matrix.os }}-buildx-
+  #     - name: Debug build results
+  #       run: ls -l ./internal/api
+  #     - name: Build docker
+  #       uses: docker/build-push-action@v4
+  #       with:
+  #         context: ./builders
+  #         file: ./builders/Dockerfile.${{ matrix.dockerfile_name }}
+  #         tags: finschia/wasmvm-builder-${{ matrix.dockerfile_name }}:latest
+  #         cache-from: type=local,src=/tmp/.buildx-cache
+  #         cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+  #         load: true
+  #         # outputs: type=docker,dest=/tmp/wasmvm-${{ matrix.os }}-builder.tar
+  #     # - name: Upload artifact
+  #     #   uses: actions/upload-artifact@v3
+  #     #   with:
+  #     #     name: wasmvm-${{ matrix.os }}-builder.tar
+  #     #     path: /tmp/wasmvm-builder
+  #     - name: Move cache
+  #       run: |
+  #         rm -rf /tmp/.buildx-cache
+  #         mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
-      # - name: Download docker image
-      #   uses: actions/download-artifact@v3
-      #   with:
-      #     name: wasmvm-builder
-      #     path: /tmp
-      # - name: Load image
-      #   run: |
-      #     docker load --input /tmp/wasmvm-builder.tar
-      #     docker image ls -a
-      - name: Build shared library for Linux
-        run: make release-build-${{ matrix.os }}
-      - name: debug
-        run: |
-          ls -al
-          ls -al /tmp
-          ls -al ./internal/api
-      - name: Upload shared library
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.os }}-shared-library
-          path: ./internal/api/*.${{ matrix.shared_library }}
+  # # build_for_Linux:
+  # #   runs-on: ubuntu-latest
+  # #   needs: deploy_to_git
+  # #   strategy:
+  # #     fail-fast: false
+  # #     matrix:
+  #     # Shared libraries for Windows (.dll) currently do not work (https://github.com/CosmWasm/wasmvm/issues/389)
+  #     # and .dll builds are not deterministic.
+  #     # Deactivating this step to avoid polluting the git hostory.
+  #   #     os: ["linux", "macos"]
+  #   # steps:
+  #   #   - name: Checkout
+  #   #     uses: actions/checkout@v3
+  #     # check tmp file 
+  #     - name: debug
+  #       run: |
+  #         docker image ls -a
+  #         ls -al ./internal/api
+
+  #     # - name: Download docker image
+  #     #   uses: actions/download-artifact@v3
+  #     #   with:
+  #     #     name: wasmvm-builder
+  #     #     path: /tmp
+  #     # - name: Load image
+  #     #   run: |
+  #     #     docker load --input /tmp/wasmvm-builder.tar
+  #     #     docker image ls -a
+  #     - name: Build shared library for Linux
+  #       run: make release-build-${{ matrix.os }}
+  #     - name: debug
+  #       run: |
+  #         ls -al
+  #         ls -al /tmp
+  #         ls -al ./internal/api
+  #     - name: Upload shared library
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: ${{ matrix.os }}-shared-library
+  #         path: ./internal/api/*.${{ matrix.shared_library }}
       
-      # - name: Build shared library for Windows
-      #   run: make release-build-windows
-      # - name: Collect artifacts
-      #   run: |
-      #     mkdir artifacts
-      #     cp ./internal/api/libwasmvm.x86_64.so ./artifacts/libwasmvm.x86_64.so
-      #     cp ./internal/api/libwasmvm.aarch64.so ./artifacts/libwasmvm.aarch64.so
-      #     cp ./internal/api/libwasmvm.dylib ./artifacts/libwasmvm.dylib
-      # - name: Create checksums
-      #   working-directory: ./artifacts
-      #   run: sha256sum * > checksums.txt && cat checksums.txt
-      # - name: Debug build results
-      #   run: ls -l ./internal/api
+  #     # - name: Build shared library for Windows
+  #     #   run: make release-build-windows
+  #     # - name: Collect artifacts
+  #     #   run: |
+  #     #     mkdir artifacts
+  #     #     cp ./internal/api/libwasmvm.x86_64.so ./artifacts/libwasmvm.x86_64.so
+  #     #     cp ./internal/api/libwasmvm.aarch64.so ./artifacts/libwasmvm.aarch64.so
+  #     #     cp ./internal/api/libwasmvm.dylib ./artifacts/libwasmvm.dylib
+  #     # - name: Create checksums
+  #     #   working-directory: ./artifacts
+  #     #   run: sha256sum * > checksums.txt && cat checksums.txt
+  #     # - name: Debug build results
+  #     #   run: ls -l ./internal/api
 
-      # - name: Check-in and push new libraries
-      #   run: |
-      #     git config user.email "wasmvm@finschia.com"
-      #     git config user.name "Deploy Bot"
-      #     git status
-      #     git add ./internal/api
+  #     # - name: Check-in and push new libraries
+  #     #   run: |
+  #     #     git config user.email "wasmvm@finschia.com"
+  #     #     git config user.name "Deploy Bot"
+  #     #     git status
+  #     #     git add ./internal/api
 
-      #     echo "Check"
-      #     git status
-      #     git commit --allow-empty -m '[skip ci] Built release libraries'
-      #     git push origin $GITHUB_REF
+  #     #     echo "Check"
+  #     #     git status
+  #     #     git commit --allow-empty -m '[skip ci] Built release libraries'
+  #     #     git push origin $GITHUB_REF
 
   deploy_to_git:
     runs-on: ubuntu-latest
-    needs: build_shared_library
+    # needs: build_shared_library
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Download shared library
-        uses: actions/download-artifact@v3
-        with:
-          path: ./internal/api
+      - name: debug
+        run: touch test.txt
+        # run: |
+        #   sleep 60
+        #   ls -al ./internal/api
+      # - name: Render template
+      #   id: template
+      #   uses: chuhlomin/render-template@v1.7
+      #   with:
+      #     template: .github/PULL_REQUEST_TEMPLATE.md
+      #     vars: |
+      #       foo: this
+      #       bar: that
+      # - name: Download shared library
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     path: ./internal/api
       - name: debug
         run: ls -al ./internal/api
       - name: Create pull request
@@ -152,13 +165,35 @@ jobs:
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           signoff: true
-          branch: update_shared_library_${{ github.sha }}
+          branch: update_shared_library
+          #_${{ github.sha }}
           delete-branch: true
           title: 'chore: update shared library'
           body: |
-            Update report
-            - Updated with *today's* date
+            # Description
+            Update shared library
+            - Updated shared library
             - Auto-generated by [create-pull-request][1]
+
+            ## Types of changes
+
+            <!-- What types of changes does your code introduce? -->
+            <!-- Put an `x` in all the boxes that apply. -->
+
+            - [ ] Bug fix (changes which fixes an issue)
+            - [ ] New feature (changes which adds functionality)
+            - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+            - [x] ETC (build, ci, docs, perf, refactor, style, test)
+
+            ## Checklist
+
+            <!-- Go over all the following points, and put an `x` in all the boxes that apply. -->
+            <!-- If you're unsure about any of these, don't hesitate to ask. We're here to help! -->
+
+            - [x] I followed the [contributing guidelines](https://github.com/Finschia/wasmvm/blob/main/CONTRIBUTING.md).
+            - [ ] I have updated the documentation accordingly.
+            - [ ] I have added tests to cover my changes.
+            - [x] The PR title and commits are followed [conventional commit form](https://www.conventionalcommits.org/en/v1.0.0).
 
             [1]: https://github.com/peter-evans/create-pull-request
           # labels: |
