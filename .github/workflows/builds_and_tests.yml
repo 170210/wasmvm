@@ -15,10 +15,10 @@ jobs:
         include: 
           - os: linux
             dockerfile_name: centos7
-            shared_library: [libwasmvm.x86_64.so,libwasmvm.aarch64.so]
+            shared_library: so
           - os: macos
             dockerfile_name: cross
-            shared_library: [libwasmvm.dylib]
+            shared_library: dylib
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -103,7 +103,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.os }}-shared-library
-          path: ./internal/api/${{ matrix.shared_library }}
+          path: ./internal/api/*.${{ matrix.shared_library }}
       # - name: Build shared library for Windows
       #   run: make release-build-windows
       # - name: Collect artifacts
@@ -111,7 +111,7 @@ jobs:
       #     mkdir artifacts
       #     cp ./internal/api/libwasmvm.x86_64.so ./artifacts/libwasmvm.x86_64.so
       #     cp ./internal/api/libwasmvm.aarch64.so ./artifacts/libwasmvm.aarch64.so
-      #cp ./internal/api/libwasmvm.dylib ./artifacts/libwasmvm.dylib
+      #     cp ./internal/api/libwasmvm.dylib ./artifacts/libwasmvm.dylib
       # - name: Create checksums
       #   working-directory: ./artifacts
       #   run: sha256sum * > checksums.txt && cat checksums.txt
