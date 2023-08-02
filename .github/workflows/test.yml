@@ -2,7 +2,7 @@ name: Builds and Tests
 
 on:
   pull_request:
-    type:
+    types:
       - closed
 
 jobs:
