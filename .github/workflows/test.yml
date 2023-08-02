@@ -15,7 +15,7 @@ jobs:
         run: touch test.txt
       - name: commit
         run: |
-          CURRENT_BRANCH="${GITHUB_REF}-update-shared-library"
+          CURRENT_BRANCH="${GITHUB_HEAD_REF}-update-shared-library"
           echo $CURRENT_BRANCH
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
