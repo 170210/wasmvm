@@ -1,0 +1,10 @@
+name: Check the action
+
+on: push
+
+jobs:
+  ttttt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print
+        run: echo hello_world

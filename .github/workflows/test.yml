@@ -2,7 +2,7 @@ name: Builds and Tests
 
 on:
   pull_request:
-    type:
+    types:
       - closed
 
 jobs:
@@ -32,8 +32,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - uses: tibdex/github-app-token@v1
+        id: generate-token
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+        env:
+          OPENSSL_CONF: /dev/null
       - name: Make changes
-        run: touch test.txt
+        run: touch te.txt
       # https://github.com/peter-evans/create-pull-request/blob/main/docs/concepts-guidelines.md#triggering-further-workflow-runs 
       # - name: test
       #   run: |
@@ -41,16 +48,17 @@ jobs:
       #     git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
       #     git add .
       #     git commit -m "auto generate shared library"
+
       - name: Create pull request
         id: cpr 
         uses: peter-evans/create-pull-request@v5
         with:
-          # token: ${{ secrets.MACHINE_USER_PAT }}
+          token: ${{ steps.generate-token.outputs.token }}
           # push-to-fork: 170210/wasmvm
           commit-message: "chore: update shared library"
 #          committer: GitHub <noreply@github.com>
-          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
-          author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          # committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          # author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           signoff: true
           branch: ${{ github.head_ref }}_shared_library_test
           base: ${{ github.head_ref }}
@@ -80,8 +88,15 @@ jobs:
           labels: automerge
           # assignees: 170210
           # reviewers: 170210
-          team-reviewers: |
-            developers
+          # team-reviewers: |
+          #   developers
           #   qa-team
           # milestone: 1
           draft: false
+      
+      #don't trigger other actions
+      # squash or merge
+      - name: Enable Pull Request Automerge
+        run: gh pr merge --squash -d --auto ${{ steps.cpr.outputs.pull-request-number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
