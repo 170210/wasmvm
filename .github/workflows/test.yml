@@ -80,8 +80,8 @@ jobs:
           labels: automerge
           # assignees: 170210
           # reviewers: 170210
-          team-reviewers: |
-            developers
+          # team-reviewers: |
+          #   developers
           #   qa-team
           # milestone: 1
           draft: false
