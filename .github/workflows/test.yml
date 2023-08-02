@@ -85,7 +85,7 @@ jobs:
           #   qa-team
           # milestone: 1
           draft: false
-      // don't trigger other actions
+      #don't trigger other actions
       - name: Enable Pull Request Automerge
         run: gh pr merge --auto ${{ github.event.pull_request.number }}
         env:
