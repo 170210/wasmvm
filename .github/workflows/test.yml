@@ -28,6 +28,7 @@ jobs:
     #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     #   deploy_to_git:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -47,7 +48,8 @@ jobs:
           # token: ${{ secrets.MACHINE_USER_PAT }}
           # push-to-fork: 170210/wasmvm
           commit-message: "chore: update shared library"
-          committer: GitHub <noreply@github.com>
+#          committer: GitHub <noreply@github.com>
+          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           signoff: true
           branch: ${{ github.head_ref }}_shared_library_test
@@ -78,8 +80,8 @@ jobs:
           labels: automerge
           # assignees: 170210
           # reviewers: 170210
-          # team-reviewers: |
-          #   developers
+          team-reviewers: |
+            developers
           #   qa-team
           # milestone: 1
           draft: false
