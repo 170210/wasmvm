@@ -46,6 +46,8 @@ jobs:
         with:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
+        env:
+          OPENSSL_CONF: /dev/null
       - name: Create pull request
         id: cpr 
         uses: peter-evans/create-pull-request@v5
