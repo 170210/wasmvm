@@ -98,8 +98,13 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: ./internal/api
+      - name: debug
+        run: |
+          ls -al
+          ls -al ./internal/api
       - name: Calculate the checksum
         run: |
+          cd ./internal/api/
           new_checksums=$(shasum -a 256 *.so *.dylib)
           old_checksums=$(cat checksums.txt)
           echo $new_checksums
