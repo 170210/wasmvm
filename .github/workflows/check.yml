@@ -3,7 +3,7 @@ name: Check the action
 on: push
 
 jobs:
-  print:
+  ttttt:
     runs-on: ubuntu-latest
     steps:
       - name: Print
