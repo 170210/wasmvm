@@ -7,4 +7,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Print
-        uses: echo hello_world
+        run: echo hello_world
