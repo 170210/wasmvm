@@ -48,9 +48,10 @@ jobs:
           # push-to-fork: 170210/wasmvm
           commit-message: "chore: update shared library"
           committer: GitHub <noreply@github.com>
-          author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           signoff: true
-          branch: "${GITHUB_HEAD_REF}_shared_library_test"
+          branch: ${{ github.head_ref }}_shared_library_test
+          base: ${{ github.head_ref }}
           #_${{ github.sha }}
           delete-branch: true
           title: 'chore: update shared library'
