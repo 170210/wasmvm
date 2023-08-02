@@ -1,4 +1,4 @@
-name: Check
+name: Check the action
 
 on: push
 
