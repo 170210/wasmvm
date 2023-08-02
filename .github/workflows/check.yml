@@ -1,0 +1,10 @@
+name: Builds and Tests
+
+on: push
+
+jobs:
+  print:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print
+        uses: echo hello_world
