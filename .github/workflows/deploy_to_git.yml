@@ -96,7 +96,7 @@ jobs:
         run: |
           mv ./artifacts/linux-shared-library/* ./internal/api/
           mv ./artifacts/macos-shared-library/* ./internal/api/
-          ls -al ./internal/api
+          ls -al ./internal/api/
       - name: Check diff
         id: cd
         run: |
