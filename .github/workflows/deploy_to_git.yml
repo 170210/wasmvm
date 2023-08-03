@@ -56,21 +56,28 @@ jobs:
           load: true
       - name: Move cache
         run: |
+          echo "Current cache contents:"
+          ls -al /tmp/.buildx-cache/${{ matrix.os }}
+          ls -al /tmp/.buildx-cache/${{ matrix.os }}-new
+
           rm -rf /tmp/.buildx-cache/${{ matrix.os }}
           mv /tmp/.buildx-cache/${{ matrix.os }}-new /tmp/.buildx-cache/${{ matrix.os }}
-      - name: Build shared library for Linux
-        run: make release-build-${{ matrix.os }}
-      # delete later
-      - name: debug
-        run: |
-          ls -al
-          ls -al /tmp
-          ls -al ./internal/api
-      - name: Upload shared library
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.os }}-shared-library
-          path: ./internal/api/*.${{ matrix.shared_library_extension }}
+
+          echo "New cache contents:"
+          ls -al /tmp/.buildx-cache/${{ matrix.os }}
+      # - name: Build shared library for Linux
+      #   run: make release-build-${{ matrix.os }}
+      # # delete later
+      # - name: debug
+      #   run: |
+      #     ls -al
+      #     ls -al /tmp
+      #     ls -al ./internal/api
+      # - name: Upload shared library
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: ${{ matrix.os }}-shared-library
+      #     path: ./internal/api/*.${{ matrix.shared_library_extension }}
 
   deploy_to_git:
     runs-on: ubuntu-latest
