@@ -96,9 +96,7 @@ jobs:
         run: |
           mv ./artifacts/linux-shared-library/* ./internal/api/
           mv ./artifacts/macos-shared-library/* ./internal/api/
-          cd ./internal/api
-          ls -al
-          cd ../
+          ls -al ./internal/api/
       - name: Check diff
         id: cd
         run: |
@@ -146,6 +144,6 @@ jobs:
       #don't trigger other actions
       - name: Enable Pull Request Automerge
         if: steps.cpr.conclusion == 'success'
-        run: gh pr merge --squash -d --auto ${{ steps.cpr.outputs.pull-request-number }}
+        run: gh pr merge --squash -d ${{ steps.cpr.outputs.pull-request-number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
