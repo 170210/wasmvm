@@ -27,7 +27,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Set up
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
           go-version: '1.20'
       - name: Set up Docker Buildx
@@ -39,14 +39,15 @@ jobs:
           TAG=$(TZ=UTC-9 date '+%Y%m')${HASH_GHE:0:7}
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache/${{ matrix.os }}
           key: ${{ matrix.os }}-buildx-${{ steps.prep.outputs.tag }}
           restore-keys: |
             ${{ matrix.os }}-buildx-
+      # delete late
       - name: Debug build results
-        run: ls -l ./internal/api
+        run: ls -al /tmp/.buildx-cache/${{ matrix.os }}-new
       - name: Build docker
         uses: docker/build-push-action@v4
         with:
@@ -63,8 +64,7 @@ jobs:
       # delete later
       - name: debug
         run: |
-          docker image ls -a
-          ls -al ./internal/api
+          ls -al /tmp/.buildx-cache/${{ matrix.os }}-new
       - name: Build shared library for Linux
         run: make release-build-${{ matrix.os }}
       # delete later
