@@ -85,6 +85,7 @@ jobs:
         with:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
+      # https://github.com/tibdex/github-app-token/issues/54#issuecomment-1410471261
         env:
           OPENSSL_CONF: /dev/null
       - name: Download shared library
@@ -97,7 +98,7 @@ jobs:
           if ! git diff --stat --exit-code ; then
             echo "need_update=true" >> "$GITHUB_OUTPUT"
           else
-            echo "need_update=false" >> "$GITHUB_OUTPUT"
+            echo "need_update=true" >> "$GITHUB_OUTPUT"
           fi
       - name: Create pull request
         if: steps.cd.outputs.need_update=='true'
