@@ -98,6 +98,7 @@ jobs:
           echo "hello"
           mv ./artifacts/macos-shared-library/* ./internal/api
           echo "hello"
+      
       # - name: Move shared library
       #   run: |
       #     mv ./artifacts/linux-shared-library/* ./internal/api
