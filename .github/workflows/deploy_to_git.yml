@@ -1,4 +1,4 @@
-name: Deploy_to_git
+name: Deploy to git
 
 on: push
   # pull_request:
@@ -127,6 +127,7 @@ jobs:
           draft: false
       #don't trigger other actions
       - name: Enable Pull Request Automerge
+        needs: Create pull request
         run: gh pr merge --squash -d --auto ${{ steps.cpr.outputs.pull-request-number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
