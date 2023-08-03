@@ -96,14 +96,13 @@ jobs:
         run: |
           mv ./artifacts/linux-shared-library/* ./internal/api
           mv ./artifacts/macos-shared-library/* ./internal/api
-          echo "hello"
       - name: Check diff
         id: cd
+        #debug
         run: |
           if ! git diff --stat --exit-code ; then
             echo "need_update=true" >> "$GITHUB_OUTPUT"
           else
-        #debug
             echo "need_update=true" >> "$GITHUB_OUTPUT"
           fi
       - name: Create commit
