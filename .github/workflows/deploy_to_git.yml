@@ -1,9 +1,9 @@
 name: Deploy_to_git
 
-on: 
-  pull_request:
-    types:
-      - closed
+on: push
+  # pull_request:
+  #   types:
+  #     - closed
 
 jobs:
   build_shared_library:
@@ -22,7 +22,7 @@ jobs:
             dockerfile_name: cross
             shared_library_extension: dylib
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     steps:
       - name: Checkout
         uses: actions/checkout@v3
