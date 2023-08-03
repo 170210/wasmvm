@@ -98,9 +98,9 @@ jobs:
         id: cd
         run: |
           if ! git diff --stat --exit-code ; then
-            echo "need_update=0" >> "$GITHUB_OUTPUT"
+            echo "need_update=true" >> "$GITHUB_OUTPUT"
           else
-            echo "need_update=1" >> "$GITHUB_OUTPUT"
+            echo "need_update=false" >> "$GITHUB_OUTPUT"
           fi
       # - name: Calculate the checksum
       #   run: |
@@ -113,7 +113,7 @@ jobs:
       - name: debug
         run: echo ${{ steps.cd.outputs.need_update }}
       - name: test
-        if: ${{ steps.cd.outputs.need_update }}
+        if: ${{ steps.cd.outputs.need_update }}=="true"
         run: echo "hello"
       # - name: Render template
       #   id: template
