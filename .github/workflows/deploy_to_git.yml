@@ -45,9 +45,6 @@ jobs:
           key: ${{ matrix.os }}-buildx-${{ steps.prep.outputs.tag }}
           restore-keys: |
             ${{ matrix.os }}-buildx-
-      # delete late
-      - name: Debug build results
-        run: ls -al /tmp/.buildx-cache/${{ matrix.os }}-new
       - name: Build docker
         uses: docker/build-push-action@v4
         with:
