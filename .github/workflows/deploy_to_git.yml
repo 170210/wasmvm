@@ -65,19 +65,13 @@ jobs:
 
           echo "New cache contents:"
           ls -al /tmp/.buildx-cache/${{ matrix.os }}
-      # - name: Build shared library for Linux
-      #   run: make release-build-${{ matrix.os }}
-      # # delete later
-      # - name: debug
-      #   run: |
-      #     ls -al
-      #     ls -al /tmp
-      #     ls -al ./internal/api
-      # - name: Upload shared library
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: ${{ matrix.os }}-shared-library
-      #     path: ./internal/api/*.${{ matrix.shared_library_extension }}
+      - name: Build shared library
+        run: make release-build-${{ matrix.os }}
+      - name: Upload shared library
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.os }}-shared-library
+          path: ./internal/api/*.${{ matrix.shared_library_extension }}
 
   deploy_to_git:
     runs-on: ubuntu-latest
@@ -89,11 +83,6 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: ./internal/api
-      # delete later
-      - name: debug
-        run: |
-          ls -al
-          ls -al ./internal/api
       - name: Check diff
         id: cd
         run: |
@@ -102,13 +91,6 @@ jobs:
           else
             echo "need_update=false" >> "$GITHUB_OUTPUT"
           fi
-      # - name: Calculate the checksum
-      #   run: |
-      #     cd ./internal/api/
-      #     new_checksums=$(shasum -a 256 *.so *.dylib)
-      #     old_checksums=$(cat checksums.txt)
-      #     echo $new_checksums
-      #     echo $old_checksums
       - name: Create pull request
         if: steps.cd.outputs.need_update=='true'
         id: cpr 
@@ -143,3 +125,8 @@ jobs:
             [1]: https://github.com/peter-evans/create-pull-request
           labels: automerge
           draft: false
+      #don't trigger other actions
+      - name: Enable Pull Request Automerge
+        run: gh pr merge --squash -d --auto ${{ steps.cpr.outputs.pull-request-number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
