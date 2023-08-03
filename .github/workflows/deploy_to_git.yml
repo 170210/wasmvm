@@ -92,8 +92,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: ./artifacts
-      - name: Move shared library
-        run: ls -al
+      # - name: Move shared library
+      #   run: |
+      #     ls -al
+      #     mv ./artifacts/linux-shared-library/* ./internal/api/
+      #     mv ./artifacts/macos-shared-library/* ./internal/api/
       - name: Check diff
         id: cd
         run: |
