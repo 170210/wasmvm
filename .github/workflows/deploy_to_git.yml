@@ -1,10 +1,15 @@
 name: Deploy to git
 
-on: push
-  # pull_request:
-  #   types:
-  #     - closed
+on:
+  pull_request:
+    types:
+      - closed
 
+permissions:
+  pull-requests: write
+  contents: write
+
+  
 jobs:
   build_shared_library:
     strategy:
@@ -92,26 +97,22 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: ./artifacts
-      - name: test
+      - name: Move shared library
         run: |
           mv ./artifacts/linux-shared-library/* ./internal/api
-          echo "hello"
           mv ./artifacts/macos-shared-library/* ./internal/api
-          echo "hello"
-      # - name: Move shared library
-      #   run: |
-      #     mv ./artifacts/linux-shared-library/* ./internal/api
-      #     mv ./artifacts/macos-shared-library/* ./internal/api
-      #     echo "hello"
       - name: Check diff
         id: cd
         run: |
           if ! git diff --stat --exit-code ; then
             echo "need_update=true" >> "$GITHUB_OUTPUT"
           else
-        #debug
-            echo "need_update=true" >> "$GITHUB_OUTPUT"
+            echo "need_update=false" >> "$GITHUB_OUTPUT"
           fi
+      - name: debug
+        run: |
+          git diff
+          echo ${{ steps.cd.outputs.need_update }}
       - name: Create commit
         if: steps.cd.outputs.need_update=='true'
         run: |
@@ -154,7 +155,14 @@ jobs:
           draft: false
       #don't trigger other actions
       - name: Enable Pull Request Automerge
-        if: steps.cpr.conclusion == 'success'
-        run: gh pr merge --squash -d ${{ steps.cpr.outputs.pull-request-number }}
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        run: gh pr merge --auto --squash -d ${{ steps.cpr.outputs.pull-request-number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Enable Pull Request Automerge
+      #   if: steps.cpr.outputs.pull-request-operation == 'created'
+      #   uses: peter-evans/enable-pull-request-automerge@v3
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+      #     merge-method: squash
