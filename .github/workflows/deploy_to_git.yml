@@ -92,18 +92,18 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: ./artifacts
-      # - name: Move shared library
-      #   run: |
-      #     ls -al
-      #     mv ./artifacts/linux-shared-library/* ./internal/api/
-      #     mv ./artifacts/macos-shared-library/* ./internal/api/
+
+      - name: Move shared library
+        run: |
+          mv ./artifacts/linux-shared-library/* ./internal/api/
+          mv ./artifacts/macos-shared-library/* ./internal/api/
+
       - name: Check diff
         id: cd
         run: |
           if ! git diff --stat --exit-code ; then
             echo "need_update=true" >> "$GITHUB_OUTPUT"
           else
-        # debug
             echo "need_update=true" >> "$GITHUB_OUTPUT"
           fi
       - name: Create pull request
@@ -144,6 +144,6 @@ jobs:
       #don't trigger other actions
       - name: Enable Pull Request Automerge
         if: steps.cpr.conclusion == 'success'
-        run: gh pr merge --squash -d ${{ steps.cpr.outputs.pull-request-number }}
+        run: gh pr merge --squash -d --auto ${{ steps.cpr.outputs.pull-request-number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
