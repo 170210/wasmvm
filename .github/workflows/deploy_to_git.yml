@@ -94,7 +94,9 @@ jobs:
           path: ./artifacts
       - name: Move shared library
         run: |
-          ls -al ./internal/api/
+          ls -al
+          mv ./artifacts/linux-shared-library/* ./internal/api/
+          mv ./artifacts/macos-shared-library/* ./internal/api/
       - name: Check diff
         id: cd
         run: |
