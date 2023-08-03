@@ -113,7 +113,7 @@ jobs:
       - name: debug
         run: echo ${{ steps.cd.outputs.need_update }}
       - name: test
-        if: ${{ steps.cd.outputs.need_update }}=="true"
+        if: steps.cd.outputs.need_update=='true'
         run: echo "hello"
       # - name: Render template
       #   id: template
