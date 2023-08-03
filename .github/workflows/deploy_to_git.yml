@@ -91,13 +91,19 @@ jobs:
       - name: Download shared library
         uses: actions/download-artifact@v3
         with:
-          path: ./internal/api
+          path: ./artifacts
+      - name: Move shared library
+        run: |
+          mv ./artifacts/linux-shared-library/* ./internal/api/
+          mv ./artifacts/macos-shared-library/* ./internal/api/
+          ls -al ./internal/api/
       - name: Check diff
         id: cd
         run: |
           if ! git diff --stat --exit-code ; then
             echo "need_update=true" >> "$GITHUB_OUTPUT"
           else
+        # debug
             echo "need_update=true" >> "$GITHUB_OUTPUT"
           fi
       - name: Create pull request
@@ -107,6 +113,7 @@ jobs:
         with:
           token: ${{ steps.generate-token.outputs.token }}
           commit-message: "chore: update shared library"
+          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           signoff: true
           branch: ${{ github.head_ref }}_shared_library_test
           base: ${{ github.head_ref }}
