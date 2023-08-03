@@ -5,6 +5,10 @@ on:
     types:
       - closed
 
+permissions:
+  pull-requests: write
+  contents: write
+
 jobs:
   build_shared_library:
     strategy:
@@ -146,15 +150,15 @@ jobs:
           labels: automerge
           draft: false
       #don't trigger other actions
-      # - name: Enable Pull Request Automerge
-      #   if: steps.cpr.conclusion == 'success'
-      #   run: gh pr merge --squash -d ${{ steps.cpr.outputs.pull-request-number }}
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Enable Pull Request Automerge
         if: steps.cpr.outputs.pull-request-operation == 'created'
-        uses: peter-evans/enable-pull-request-automerge@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
-          merge-method: squash
+        run: gh pr merge --auto --squash -d ${{ steps.cpr.outputs.pull-request-number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Enable Pull Request Automerge
+      #   if: steps.cpr.outputs.pull-request-operation == 'created'
+      #   uses: peter-evans/enable-pull-request-automerge@v3
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+      #     merge-method: squash
