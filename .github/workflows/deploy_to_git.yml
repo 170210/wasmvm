@@ -58,10 +58,6 @@ jobs:
         run: |
           rm -rf /tmp/.buildx-cache/${{ matrix.os }}
           mv /tmp/.buildx-cache/${{ matrix.os }}-new /tmp/.buildx-cache/${{ matrix.os }}
-      # delete later
-      - name: debug
-        run: |
-          ls -al /tmp/.buildx-cache/${{ matrix.os }}-new
       - name: Build shared library for Linux
         run: make release-build-${{ matrix.os }}
       # delete later
