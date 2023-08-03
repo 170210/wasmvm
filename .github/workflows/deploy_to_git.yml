@@ -89,7 +89,7 @@ jobs:
           if ! git diff --stat --exit-code ; then
             echo "need_update=true" >> "$GITHUB_OUTPUT"
           else
-            echo "need_update=false" >> "$GITHUB_OUTPUT"
+            echo "need_update=true" >> "$GITHUB_OUTPUT"
           fi
       - name: Create pull request
         if: steps.cd.outputs.need_update=='true'
@@ -127,7 +127,7 @@ jobs:
           draft: false
       #don't trigger other actions
       - name: Enable Pull Request Automerge
-        needs: Create pull request
+        if: steps.cpr.conclusion == 'success'
         run: gh pr merge --squash -d --auto ${{ steps.cpr.outputs.pull-request-number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
