@@ -97,13 +97,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: ./artifacts
-      - name: Move shared library
-        run: |
-          mv ./artifacts/linux-shared-library/* ./internal/api
-          mv ./artifacts/macos-shared-library/* ./internal/api
       - name: Check diff
         id: cd
         run: |
+          mv ./artifacts/linux-shared-library/* ./internal/api
+          mv ./artifacts/macos-shared-library/* ./internal/api
           if ! git diff --stat --exit-code ; then
             echo "need_update=true" >> "$GITHUB_OUTPUT"
           else
@@ -111,7 +109,7 @@ jobs:
           fi
       - name: debug
         run: |
-          git diff
+          ls -al ./internal/api
           echo ${{ steps.cd.outputs.need_update }}
       - name: Create commit
         if: steps.cd.outputs.need_update=='true'
