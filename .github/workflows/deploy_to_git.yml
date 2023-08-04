@@ -150,7 +150,7 @@ jobs:
       #don't trigger other actions
       - name: Enable Pull Request Automerge
         if: steps.cpr.outputs.pull-request-operation == 'created'
-        run: gh pr merge --auto --squash -d ${{ steps.cpr.outputs.pull-request-number }}
+        run: gh pr merge --auto --squash --delete-branch ${{ steps.cpr.outputs.pull-request-number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # - name: Enable Pull Request Automerge
