@@ -102,12 +102,11 @@ jobs:
           mv ./artifacts/macos-shared-library/* ./internal/api
       - name: Check diff
         id: cd
-        #debug
         run: |
           if ! git diff --stat --exit-code ; then
             echo "need_update=true" >> "$GITHUB_OUTPUT"
           else
-            echo "need_update=true" >> "$GITHUB_OUTPUT"
+            echo "need_update=false" >> "$GITHUB_OUTPUT"
           fi
       - name: Create commit
         if: steps.cd.outputs.need_update=='true'
