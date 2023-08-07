@@ -103,6 +103,8 @@ jobs:
           PATTERNS: |
             internal/api/*.so
             internal/api/*.dylib
+      - name: debug
+        run: echo ${{ env.GIT_DIFF }}
       - name: Create commit
         if: env.GIT_DIFF
         run: |
