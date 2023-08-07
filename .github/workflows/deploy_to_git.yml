@@ -11,76 +11,77 @@ permissions:
 
   
 jobs:
-  build_shared_library:
-    strategy:
-      fail-fast: false
-      matrix:
-      # Shared libraries for Windows (.dll) currently do not work (https://github.com/CosmWasm/wasmvm/issues/389)
-      # and .dll builds are not deterministic.
-      # Deactivating this step to avoid polluting the git hostory.
-        os: [linux, macos]
-        include: 
-          - os: linux
-            dockerfile_name: centos7
-            shared_library_extension: so
-          - os: macos
-            dockerfile_name: cross
-            shared_library_extension: dylib
-    runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Set up
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.20'
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Prepare
-        id: prep
-        run: |
-          HASH_GHE=${{ github.sha }}
-          TAG=$(TZ=UTC-9 date '+%Y%m')${HASH_GHE:0:7}
-          echo "tag=${TAG}" >> $GITHUB_OUTPUT
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache/${{ matrix.os }}
-          key: ${{ matrix.os }}-buildx-${{ steps.prep.outputs.tag }}
-          restore-keys: |
-            ${{ matrix.os }}-buildx-
-      - name: Build docker
-        uses: docker/build-push-action@v4
-        with:
-          context: ./builders
-          file: ./builders/Dockerfile.${{ matrix.dockerfile_name }}
-          tags: finschia/wasmvm-builder-${{ matrix.dockerfile_name }}:latest
-          cache-from: type=local,src=/tmp/.buildx-cache/${{ matrix.os }}
-          cache-to: type=local,dest=/tmp/.buildx-cache/${{ matrix.os }}-new,mode=max
-          load: true
-      - name: Move cache
-        run: |
-          echo "Current cache contents:"
-          ls -al /tmp/.buildx-cache/${{ matrix.os }}
-          ls -al /tmp/.buildx-cache/${{ matrix.os }}-new
+  # build_shared_library:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #     # Shared libraries for Windows (.dll) currently do not work (https://github.com/CosmWasm/wasmvm/issues/389)
+  #     # and .dll builds are not deterministic.
+  #     # Deactivating this step to avoid polluting the git hostory.
+  #       os: [linux, macos]
+  #       include: 
+  #         - os: linux
+  #           dockerfile_name: centos7
+  #           shared_library_extension: so
+  #         - os: macos
+  #           dockerfile_name: cross
+  #           shared_library_extension: dylib
+  #   runs-on: ubuntu-latest
+  #   if: github.event.pull_request.merged == true
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #     - name: Set up
+  #       uses: actions/setup-go@v4
+  #       with:
+  #         go-version: '1.20'
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v2
+  #     - name: Prepare
+  #       id: prep
+  #       run: |
+  #         HASH_GHE=${{ github.sha }}
+  #         TAG=$(TZ=UTC-9 date '+%Y%m')${HASH_GHE:0:7}
+  #         echo "tag=${TAG}" >> $GITHUB_OUTPUT
+  #     - name: Cache Docker layers
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: /tmp/.buildx-cache/${{ matrix.os }}
+  #         key: ${{ matrix.os }}-buildx-${{ steps.prep.outputs.tag }}
+  #         restore-keys: |
+  #           ${{ matrix.os }}-buildx-
+  #     - name: Build docker
+  #       uses: docker/build-push-action@v4
+  #       with:
+  #         context: ./builders
+  #         file: ./builders/Dockerfile.${{ matrix.dockerfile_name }}
+  #         tags: finschia/wasmvm-builder-${{ matrix.dockerfile_name }}:latest
+  #         cache-from: type=local,src=/tmp/.buildx-cache/${{ matrix.os }}
+  #         cache-to: type=local,dest=/tmp/.buildx-cache/${{ matrix.os }}-new,mode=max
+  #         load: true
+  #     - name: Move cache
+  #       run: |
+  #         echo "Current cache contents:"
+  #         ls -al /tmp/.buildx-cache/${{ matrix.os }}
+  #         ls -al /tmp/.buildx-cache/${{ matrix.os }}-new
 
-          rm -rf /tmp/.buildx-cache/${{ matrix.os }}
-          mv /tmp/.buildx-cache/${{ matrix.os }}-new /tmp/.buildx-cache/${{ matrix.os }}
+  #         rm -rf /tmp/.buildx-cache/${{ matrix.os }}
+  #         mv /tmp/.buildx-cache/${{ matrix.os }}-new /tmp/.buildx-cache/${{ matrix.os }}
 
-          echo "New cache contents:"
-          ls -al /tmp/.buildx-cache/${{ matrix.os }}
-      - name: Build shared library
-        run: make release-build-${{ matrix.os }}
-      - name: Upload shared library
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.os }}-shared-library
-          path: ./internal/api/*.${{ matrix.shared_library_extension }}
+  #         echo "New cache contents:"
+  #         ls -al /tmp/.buildx-cache/${{ matrix.os }}
+  #     - name: Build shared library
+  #       run: make release-build-${{ matrix.os }}
+  #     - name: Upload shared library
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: ${{ matrix.os }}-shared-library
+  #         path: ./internal/api/*.${{ matrix.shared_library_extension }}
 
   deploy_to_git:
     runs-on: ubuntu-latest
-    needs: build_shared_library
+    # needs: build_shared_library
+    if: github.event.pull_request.merged == true
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -93,30 +94,30 @@ jobs:
       # https://github.com/tibdex/github-app-token/issues/54#issuecomment-1410471261
         env:
           OPENSSL_CONF: /dev/null
-      - name: Download shared library
-        uses: actions/download-artifact@v3
-        with:
-          path: ./artifacts
-      - name: move
-        run: |
-          mv ./artifacts/linux-shared-library/* ./internal/api
-          mv ./artifacts/macos-shared-library/* ./internal/api
-      - name: Check diff
-        uses: technote-space/get-diff-action@v6.1.2
-        with:
-          PATTERNS: |
-            internal/api/*.so
-            internal/api/*.dylib
+      # - name: Download shared library
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     path: ./artifacts
+      # - name: move
+      #   run: |
+      #     mv ./artifacts/linux-shared-library/* ./internal/api
+      #     mv ./artifacts/macos-shared-library/* ./internal/api
+      # - name: Check diff
+      #   uses: technote-space/get-diff-action@v6.1.2
+      #   with:
+      #     PATTERNS: |
+      #       internal/api/*.so
+      #       internal/api/*.dylib
       - name: debug
-        run: echo ${{ env.GIT_DIFF }}
+        run: touch test.txt
       - name: Create commit
-        if: env.GIT_DIFF
+      #  if: env.GIT_DIFF
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "auto generate shared library"
       - name: Create pull request
-        if: env.GIT_DIFF
+      #  if: env.GIT_DIFF
         id: cpr 
         uses: peter-evans/create-pull-request@v5
         with:
