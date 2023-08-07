@@ -91,6 +91,12 @@ jobs:
         with:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
+      - name: Get approve token
+        uses: tibdex/github-app-token@v1
+        id: generate-approve-token
+        with:
+          app_id: ${{ secrets.AUTO_APPROVE_BOT_ID_1 }}
+          private_key: ${{ secrets.AUTO_APPROVE_BOT_PR_1 }}
       # https://github.com/tibdex/github-app-token/issues/54#issuecomment-1410471261
         env:
           OPENSSL_CONF: /dev/null
@@ -156,7 +162,7 @@ jobs:
         if: steps.cpr.outputs.pull-request-operation == 'created'
         run: gh pr review --approve "${{ steps.cpr.outputs.pull-request-number }}"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.generate-approve-token.outputs.token }}
       - name: Enable Pull Request Automerge
         if: steps.cpr.outputs.pull-request-operation == 'created'
         run: gh pr merge --auto --squash --delete-branch ${{ steps.cpr.outputs.pull-request-number }}
