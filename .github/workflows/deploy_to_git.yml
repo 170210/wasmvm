@@ -98,24 +98,19 @@ jobs:
         with:
           path: ./artifacts
       - name: Check diff
-        id: cd
-        run: |
-          mv ./artifacts/linux-shared-library/* ./internal/api
-          mv ./artifacts/macos-shared-library/* ./internal/api
-          git add .
-          if ! git diff --cached --exit-code ; then
-            echo "need_update=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "need_update=false" >> "$GITHUB_OUTPUT"
-          fi
+        uses: technote-space/get-diff-action@v6.1.2
+        with:
+          PATTERNS: |
+            internal/api/*.so
+            internal/api/*.dylib
       - name: Create commit
-        if: steps.cd.outputs.need_update=='true'
+        if: env.GIT_DIFF
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "auto generate shared library"
       - name: Create pull request
-        if: steps.cd.outputs.need_update=='true'
+        if: env.GIT_DIFF
         id: cpr 
         uses: peter-evans/create-pull-request@v5
         with:
