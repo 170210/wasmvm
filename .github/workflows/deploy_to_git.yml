@@ -97,12 +97,16 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: ./artifacts
+      - name: move
+        run: |
+          mv ./artifacts/linux-shared-library/* ./internal/api
+          mv ./artifacts/macos-shared-library/* ./internal/api
       - name: Check diff
         uses: technote-space/get-diff-action@v6.1.2
         with:
           PATTERNS: |
-            internal/api/*.so
-            internal/api/*.dylib
+            ./internal/api/*.so
+            ./internal/api/*.dylib
       - name: debug
         run: echo ${{ env.GIT_DIFF }}
       - name: Create commit
@@ -145,6 +149,9 @@ jobs:
           labels: automerge
           draft: false
       #don't trigger other actions
+      - uses: hmarr/auto-approve-action@v3
+        with:
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
       - name: Enable Pull Request Automerge
         if: steps.cpr.outputs.pull-request-operation == 'created'
         run: gh pr merge --auto --squash --delete-branch ${{ steps.cpr.outputs.pull-request-number }}
