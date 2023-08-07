@@ -152,11 +152,11 @@ jobs:
           labels: automerge
           draft: false
       #don't trigger other actions
-      - name: auto approve
+      - name: Auto approve
         if: steps.cpr.outputs.pull-request-operation == 'created'
-        uses: hmarr/auto-approve-action@v3
-        with:
-          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+        run: gh pr review --approve "${{ steps.cpr.outputs.pull-request-number }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Enable Pull Request Automerge
         if: steps.cpr.outputs.pull-request-operation == 'created'
         run: gh pr merge --auto --squash --delete-branch ${{ steps.cpr.outputs.pull-request-number }}
