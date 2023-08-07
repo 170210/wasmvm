@@ -108,13 +108,15 @@ jobs:
       #     PATTERNS: |
       #       internal/api/*.so
       #       internal/api/*.dylib
-      - name: debug
-        run: touch test.txt
+      # - name: debug
+      #   run: touch test.txt
       - name: Create commit
       #  if: env.GIT_DIFF
         run: |
+          touch test.txt
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
           git commit -m "auto generate shared library"
       - name: Create pull request
       #  if: env.GIT_DIFF
